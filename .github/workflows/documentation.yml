@@ -1,0 +1,24 @@
+name: Recovery documentation checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  docs-only:
+    name: Validate recovery documentation only
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Confirm documented recovery files
+        run: |
+          test -s README.md
+          test -s docs/RECOVERY-LEDGER.md
+          test -s docs/PORCHTALK-TRANSPORT-CONTRACT.md
+          test -s docs/PHYSICAL-TEST-GATES.md
+      - name: Explicit scope notice
+        run: |
+          echo "DOCS ONLY: recovered application source not yet imported."
+          echo "This check does not run LightBridge or STACK-21 software tests."
