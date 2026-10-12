@@ -13,9 +13,9 @@ The importer requires their exact SHA-256 hashes recorded in [the recovery ledge
 
 ## Windows PowerShell
 
-From a local clone of \`MichaelWave369/LightBridge\` after this PR is merged, place the recovered ZIPs in your **Downloads** folder:
+From a local clone of `MichaelWave369/LightBridge` after this PR is merged, place the recovered ZIPs in your **Downloads** folder:
 
-\`\`\`powershell
+```powershell
 git switch -c recovery/import-original-sources
 python tools/import_recovered.py --qr "$env:USERPROFILE\Downloads\Parallax_LightBridge_v0.1.0_Candidate_Bundle.zip" --stack "$env:USERPROFILE\Downloads\lightbridge-stack21-v0.2.zip" --dry-run
 python tools/import_recovered.py --qr "$env:USERPROFILE\Downloads\Parallax_LightBridge_v0.1.0_Candidate_Bundle.zip" --stack "$env:USERPROFILE\Downloads\lightbridge-stack21-v0.2.zip"
@@ -27,13 +27,13 @@ cd ../..
 git add apps/qr-transfer-v0.1 experiments/stack21-v0.2 RECOVERED-FILE-SHA256.json
 git commit -m "recovery: import original optical candidates unchanged"
 git push -u origin recovery/import-original-sources
-\`\`\`
+```
 
-Then open a PR to \`main\` and review the historical logs, screenshots, and spec artifacts before making them public.
+Then open a PR to `main` and review the historical logs, screenshots, and spec artifacts before making them public.
 
 ## Rights and receipts
 
-The root MIT license applies to authorized original LightBridge code. Preserve the recovered QR candidate's historically accurate original \`LICENSE-NOTICE.md\`, plus \`THIRD_PARTY_NOTICES.md\`, the vendored Apache-2.0 license, and upstream MIT notices. Source ZIPs remain untouched.
+The root MIT license applies to authorized original LightBridge code. Preserve the recovered QR candidate's historically accurate original `LICENSE-NOTICE.md`, plus `THIRD_PARTY_NOTICES.md`, the vendored Apache-2.0 license, and upstream MIT notices. Source ZIPs remain untouched.
 
 Importer success proves the bytes match the known uploaded archives, not that LightBridge is secure, physically validated, or ready to deploy. Once source is committed, the runtime CI executes the original Node checks.
 
