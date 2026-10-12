@@ -34,9 +34,9 @@ LightBridge may implement an **offline transport adapter** for the Infinite Porc
 - Import both candidates into clearly labeled legacy and experimental directories without changing the originals.
 - Establish automated checks for both candidates.
 - Perform documented real-device transfers and failure tests.
-- Decide the license for original code; preserve third-party licensing.
+- Apply the approved MIT license to original code; preserve third-party licenses and attribution.
 - Only then design a bounded PorchTalk pairing adapter.
 
 ## License and authority
 
-No public license for the original Parallax LightBridge code was selected in the recovered v0.1.0 bundle. This repository being publicly visible **does not itself grant a license** to reuse its original code. Vendored dependencies may have separate license terms. Human review governs public release, claims, and access decisions.
+The project owner selected the **[MIT License](LICENSE)** for original LightBridge project code on 2026-10-12. The recovered v0.1.0 bundle's older `LICENSE-NOTICE.md` remains unchanged as a historical record of its former undecided status. **Third-party code retains its own licensing and notices**, including the bundled QR encoder's Apache-2.0 and upstream MIT notices. See [the license decision and attribution boundaries](docs/LICENSE-DECISION.md). MIT licensing does not imply a security audit, hardware validation, or production release.
