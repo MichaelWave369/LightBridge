@@ -18,11 +18,15 @@ jobs:
       - name: Report source status and run original checks if imported
         shell: bash
         run: |
-          if [[ ! -f apps/qr-transfer-v0.1/package.json || ! -f experiments/stack21-v0.2/tests.mjs ]]; then
-            echo "RECOVERED SOURCE NOT YET COMMITTED: cannot execute original optical tests."
-            echo "This workflow has NOT verified LightBridge software functionality."
+          if [[ ! -d apps/qr-transfer-v0.1 && ! -d experiments/stack21-v0.2 ]]; then
+            echo "RECOVERED SOURCE NOT YET COMMITTED: optical tests were NOT executed."
             exit 0
           fi
+          if [[ ! -f apps/qr-transfer-v0.1/package.json || ! -f experiments/stack21-v0.2/tests.mjs || ! -f RECOVERED-FILE-SHA256.json ]]; then
+            echo "PARTIAL SOURCE IMPORT: refusal to claim success" >&2
+            exit 1
+          fi
+          python tools/verify_recovered.py
           echo "Running original QR candidate checks"
           (cd apps/qr-transfer-v0.1 && npm run check)
           echo "Running original STACK-21 simulation checks"
