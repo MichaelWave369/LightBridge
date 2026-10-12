@@ -1,0 +1,29 @@
+name: Original candidate runtime checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  software-candidates:
+    name: Optical candidate checks (only if source imported)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Report source status and run original checks if imported
+        shell: bash
+        run: |
+          if [[ ! -f apps/qr-transfer-v0.1/package.json || ! -f experiments/stack21-v0.2/tests.mjs ]]; then
+            echo "RECOVERED SOURCE NOT YET COMMITTED: cannot execute original optical tests."
+            echo "This workflow has NOT verified LightBridge software functionality."
+            exit 0
+          fi
+          echo "Running original QR candidate checks"
+          (cd apps/qr-transfer-v0.1 && npm run check)
+          echo "Running original STACK-21 simulation checks"
+          (cd experiments/stack21-v0.2 && node tests.mjs)
