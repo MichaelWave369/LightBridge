@@ -27,11 +27,11 @@ These software checks are not security certification, optical throughput measure
 - `experiments/stack21-v0.2/` for the complete *unchanged* STACK-21 bundle contents.
 - `research/` may later hold selected architecture documents only after separate publication review.
 
-**Do not silently replace original source files, receipts, logs, or third-party licensing when importing.** A copy in a repository is not the same as a verified device run.
+**Do not silently replace original source files, receipts, logs, or third-party licensing when importing.** Retain the v0.1 historical `LICENSE-NOTICE.md` unchanged, and add a pointer to the subsequent MIT decision. A copy in a repository is not the same as a verified device run.
 
 ## Release blockers
 
-1. Public-license decision for **original** Parallax code is missing in the v0.1 package.
+1. **MIT license decided** for authorized original LightBridge code on 2026-10-12; the recovered v0.1 notice is a historical record. Attribution review and application during code import remain outstanding. See [license decision](LICENSE-DECISION.md).
 2. Third-party QR encoder notices and obligations require review.
 3. `BarcodeDetector` varies by browser and device; no universal camera receiver is proven.
 4. Identity binding, digital signatures, replay protection, permission review, and abuse handling are deferred.
