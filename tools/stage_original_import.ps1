@@ -34,7 +34,13 @@ if (Get-Command python -ErrorAction SilentlyContinue) {
 } else {
     throw "Python 3 is required. Install Python and retry."
 }
-if (-not (Get-Command npm -ErrorAction SilentlyContinue)) { throw "Node/npm is required." }
+if (Get-Command npm.cmd -ErrorAction SilentlyContinue) {
+    $npmExe = "npm.cmd"
+} elseif (Get-Command npm -ErrorAction SilentlyContinue) {
+    $npmExe = "npm"
+} else {
+    throw "Node/npm is required."
+}
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw "Node.js is required." }
 
 Push-Location $repoRoot
@@ -65,7 +71,7 @@ try {
     }
 
     Push-Location "apps/qr-transfer-v0.1"
-    try { Invoke-Checked "npm" @("run", "check") }
+    try { Invoke-Checked $npmExe @("run", "check") }
     finally { Pop-Location }
 
     Push-Location "experiments/stack21-v0.2"
