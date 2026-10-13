@@ -1,0 +1,33 @@
+name: Original candidate runtime checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  software-candidates:
+    name: Optical candidate checks (only if source imported)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Report source status and run original checks if imported
+        shell: bash
+        run: |
+          if [[ ! -d apps/qr-transfer-v0.1 && ! -d experiments/stack21-v0.2 ]]; then
+            echo "RECOVERED SOURCE NOT YET COMMITTED: optical tests were NOT executed."
+            exit 0
+          fi
+          if [[ ! -f apps/qr-transfer-v0.1/package.json || ! -f experiments/stack21-v0.2/tests.mjs || ! -f RECOVERED-FILE-SHA256.json ]]; then
+            echo "PARTIAL SOURCE IMPORT: refusal to claim success" >&2
+            exit 1
+          fi
+          python tools/verify_recovered.py
+          echo "Running original QR candidate checks"
+          (cd apps/qr-transfer-v0.1 && npm run check)
+          echo "Running original STACK-21 simulation checks"
+          (cd experiments/stack21-v0.2 && node tests.mjs)
