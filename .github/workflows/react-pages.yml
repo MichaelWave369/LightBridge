@@ -1,0 +1,61 @@
+name: LightBridge React Pages
+
+on:
+  pull_request:
+    paths:
+      - 'site/**'
+      - '.github/workflows/react-pages.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - '.github/workflows/react-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lightbridge-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Test and build React console
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned dependencies
+        working-directory: site
+        run: npm install --no-audit --no-fund
+      - name: Protocol unit tests
+        working-directory: site
+        run: npm run test
+      - name: Production build
+        working-directory: site
+        run: npm run build
+      - name: Upload site
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/dist
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    name: Deploy GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+      contents: read
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish site
+        id: deployment
+        uses: actions/deploy-pages@v4
