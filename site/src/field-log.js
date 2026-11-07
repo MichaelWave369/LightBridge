@@ -20,7 +20,7 @@ export class FieldRecorder {
     this.counters={displayed:0,observed:0,observedCamera:0,observedManual:0,
       duplicate:0,rejected:0,scanAttempts:0,scanQrDecoded:0,
       cameraStarts:0,verificationSucceeded:0,verificationFailed:0};
-    this.verified=null;this.droppedEvents=0;
+    this.verified=null;this.droppedEvents=0;this.observedSequences=new Set();
   }
   #push(event){
     if(this.events.length>=MAX_LOG_EVENTS){this.droppedEvents++;return;}
@@ -51,7 +51,8 @@ export class FieldRecorder {
     const frame=decodeFrame(frameText);
     if(this.sessionId===null)this.sessionId=frame.session;
     if(frame.session!==this.sessionId)throw new Error("Unmatched received session");
-    const duplicate=Boolean(snapshot?.redundant>this.counters.duplicate);
+    const duplicate=this.observedSequences.has(frame.sequence);
+    this.observedSequences.add(frame.sequence);
     this.counters.observed++;
     if(method==="camera")this.counters.observedCamera++;
     else this.counters.observedManual++;
