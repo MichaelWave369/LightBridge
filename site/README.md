@@ -56,3 +56,7 @@ The **Optical Lab** tab runs the actual PLB1 decoder and cryptographic integrity
 ## Rung 11: Field Compare
 
 The **Field Compare** tab loads sender and receiver event-log JSON locally, separates camera observations from manual entries, checks PLB1 session agreement, compares recorded frame sequence overlap, and optionally shows a synthetic Optical Lab report alongside it. None of these self-reported values establish physical frame loss, independent optical receipt, or one-way latency. See [Rung 11 methodology](../docs/FIELD-COMPARE-RUNG11.md).
+
+## Rung 12: Physical Link Trial Kit
+
+The **Trial Kit** tab guides a human-operated screen-to-camera experiment. The Transmit panel includes a one-click **public 256-byte test packet** loader, which clears the passphrase and disables encryption **only for the synthetic public packet**. Prepare and Start remain manual. No physical transfer is claimed until actually observed and documented. See [Rung 12 plan](../docs/PHYSICAL-TRIAL-KIT-RUNG12.md).
