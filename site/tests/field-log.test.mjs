@@ -1,0 +1,53 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {FieldRecorder,FIELD_SCHEMA} from "../src/field-log.js";
+import {encodeFrame} from "../src/protocol.js";
+const frame=(sequence=0)=>encodeFrame({session:"example_01",sequence,count:2,size:128,length:240,payload:new Uint8Array(128)});
+test("logs sender-generated QR frames without claiming receipt",()=>{
+  let t=100;
+  const tx=new FieldRecorder("sender",{clock:()=>t,utcClock:()=>"2026-11-06T10:00:00Z"});
+  tx.begin("example_01");
+  t=225;tx.shown(frame(0));
+  t=300;tx.shown(frame(1));
+  const log=tx.exportLog({deviceLabel:"local screen"});
+  assert.equal(log.schema,FIELD_SCHEMA);
+  assert.deepEqual(log.events.map(e=>e.sequence),[0,1]);
+  assert.equal(log.events[0].elapsedMs,125);
+  assert.equal(log.counters.displayed,2);
+  assert.equal(log.physicalCameraTransferIndependentlyVerified,false);
+  assert.throws(()=>tx.shown(frame(2).replace("example_01","other_001")),/Wrong|CRC/);
+});
+test("receiver log separates manual and camera captures and rejected frames",()=>{
+  let t=0;
+  const rx=new FieldRecorder("receiver",{clock:()=>t,utcClock:()=>"2026-11-06T10:00:00Z"});
+  t=10;rx.cameraEvent("camera-start");rx.scanAttempt(false);
+  t=200;rx.scanAttempt(true);
+  t=300;rx.received(frame(0),"camera",{redundant:0,received:1});
+  t=500;rx.received(frame(0),"camera",{redundant:1,received:1});
+  t=700;rx.received(frame(1),"manual",{redundant:1,received:2});
+  rx.rejected("camera","Frame CRC mismatch");
+  rx.verification("success",{sha256:"a".repeat(64),bytes:140});
+  const log=rx.exportLog({distanceCm:"30",notes:"test"});
+  assert.equal(log.counters.scanAttempts,2);
+  assert.equal(log.counters.scanQrDecoded,1);
+  assert.equal(log.counters.observedCamera,2);
+  assert.equal(log.counters.observedManual,1);
+  assert.equal(log.counters.duplicate,1);
+  assert.equal(log.counters.rejected,1);
+  assert.equal(log.verified.sha256,"a".repeat(64));
+  assert.deepEqual(log.events.filter(e=>e.type==="frame_observed").map(e=>e.sequence),[0,0,1]);
+  assert.equal(log.senderIdentityAuthenticated,false);
+});
+test("failure and incomplete sessions never fabricate verified hash",()=>{
+  const r=new FieldRecorder("receiver");
+  r.verification("failure");
+  assert.equal(r.exportLog().verified,null);
+  assert.equal(r.exportLog().counters.verificationFailed,1);
+});
+test("field conditions are trimmed and no raw PLB1 payload is exported",()=>{
+  const rx=new FieldRecorder("receiver");
+  rx.received(frame(0),"manual",{received:1,redundant:0});
+  const log=rx.exportLog({deviceLabel:"x".repeat(500)});
+  assert.equal(log.conditions.deviceLabel.length,160);
+  assert.equal(JSON.stringify(log).includes("PLB1|"),false);
+});

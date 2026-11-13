@@ -40,3 +40,7 @@ LightBridge may implement an **offline transport adapter** for the Infinite Porc
 ## License and authority
 
 The project owner selected the **[MIT License](LICENSE)** for original LightBridge project code on 2026-10-12. The recovered v0.1.0 bundle's older `LICENSE-NOTICE.md` remains unchanged as a historical record of its former undecided status. **Third-party code retains its own licensing and notices**, including the bundled QR encoder's Apache-2.0 and upstream MIT notices. See [the license decision and attribution boundaries](docs/LICENSE-DECISION.md). MIT licensing does not imply a security audit, hardware validation, or production release.
+
+## Rung 10 optical field-test instrumentation
+
+The React sender and receiver now export local **unsigned field-event logs**: generated QR frame sequence/timing, camera vs pasted-frame observations, duplicates/rejections, final SHA-256 verification and optional self-reported testing conditions. These logs are intended for paired analysis in PoWE Rung 10. No physical screen-to-camera test is claimed by merely shipping the software. [Field-test steps and provenance limits](docs/FIELD-LOGS-RUNG10.md).

@@ -8,6 +8,7 @@ import {
   Monitor, WifiOff, FileCheck2, Activity, Fingerprint, Eye, Shield, FileText
 } from "lucide-react";
 import {BLOCK_SIZE,MAX_FILE_BYTES,createTransfer,Receiver,finalizeTransfer} from "./protocol.js";
+import {FieldRecorder} from "./field-log.js";
 import OpticalLab from "./OpticalLab.jsx";
 
 const SOURCE = "https://github.com/MichaelWave369/LightBridge";
@@ -60,8 +61,12 @@ export default function App() {
   const rxRef=useRef(new Receiver());
   const resultUrlRef=useRef(null);
   const workingRef=useRef(false);
+  const senderLogRef=useRef(new FieldRecorder("sender"));
+  const receiverLogRef=useRef(new FieldRecorder("receiver"));
+  const [fieldConditions,setFieldConditions]=useState({distanceCm:"",lighting:"",deviceLabel:"",notes:""});
 
   const stopCamera = useCallback(()=>{
+    if(activeRef.current)receiverLogRef.current.cameraEvent("camera-stop");
     activeRef.current=false;
     if(frameIdRef.current!==null) cancelAnimationFrame(frameIdRef.current);
     frameIdRef.current=null;
@@ -80,7 +85,7 @@ export default function App() {
       try{
         const text=tx.makeFrame(seq);
         const url=await QRCode.toDataURL(text,{width:560,margin:3,errorCorrectionLevel:"L",color:{dark:"#071a27",light:"#f4fafc"}});
-        if(valid){setRawFrame(text);setQrSrc(url);setTxError("");}
+        if(valid){setRawFrame(text);setQrSrc(url);setTxError("");senderLogRef.current.shown(text);}
       } catch(e){if(valid){setTxError("QR encoding failed: "+e.message);setRunning(false);}}
     }
     paint();
@@ -102,21 +107,24 @@ export default function App() {
     setTxBusy(true);setTxError("");setRunning(false);
     try{
       const prepared=await createTransfer(file,{encrypt:encrypted,passphrase:password,blockSize:BLOCK_SIZE});
+      senderLogRef.current.begin(prepared.session);
       setTx(prepared);setSeq(0);
     }catch(e){setTx(null);setTxError(e.message);}finally{setTxBusy(false);}
   }
   const resetTx=()=>{setTx(null);setRunning(false);setSeq(0);setFile(null);setPassword("");setTxError("");if(inputRef.current)inputRef.current.value="";};
 
-  const ingest=useCallback(value=>{
+  const ingest=useCallback((value,method="manual")=>{
     const cleaned=String(value||"").trim();
     if(!cleaned)return;
     try{
       const snapshot=rxRef.current.addFrame(cleaned);
+      receiverLogRef.current.received(cleaned,method,snapshot);
       setRxSnapshot({...snapshot});setLastSeen(cleaned.slice(0,70)+"...");
       setRxError("");
       if(snapshot.complete)stopCamera();
     }catch(e){
       // Repeated scans and isolated decoding errors should not erase valid work.
+      receiverLogRef.current.rejected(method,e.message);
       setRxError(e.message);
     }
   },[stopCamera]);
@@ -148,7 +156,8 @@ export default function App() {
             text=decoded?.data || "";
           }
         }
-        if(text?.startsWith("PLB1|"))receiveRef.current(text);
+        receiverLogRef.current.scanAttempt(Boolean(text?.startsWith("PLB1|")));
+        if(text?.startsWith("PLB1|"))receiveRef.current(text,"camera");
       }catch(e){setCamError("Camera decoding: "+e.message);}
       finally{workingRef.current=false;}
     }
@@ -169,11 +178,11 @@ export default function App() {
           if(formats.includes("qr_code"))detectorRef.current=new window.BarcodeDetector({formats:["qr_code"]});
         }catch{detectorRef.current=null;}
       }
-      activeRef.current=true;setCameraOn(true);frameIdRef.current=requestAnimationFrame(scanLoop);
+      activeRef.current=true;receiverLogRef.current.cameraEvent("camera-start");setCameraOn(true);frameIdRef.current=requestAnimationFrame(scanLoop);
     }catch(e){stopCamera();setCamError(e.message);}
   }
   function resetRx(){
-    stopCamera();rxRef.current=new Receiver();setRxSnapshot(rxRef.current.snapshot());
+    stopCamera();rxRef.current=new Receiver();receiverLogRef.current.begin(null);setRxSnapshot(rxRef.current.snapshot());
     setRxError("");setCamError("");setLastSeen("");setManual("");setRxPassword("");setResult(null);
     if(resultUrlRef.current)URL.revokeObjectURL(resultUrlRef.current);
     resultUrlRef.current=null;
@@ -186,7 +195,8 @@ export default function App() {
       const href=URL.createObjectURL(new Blob([data.bytes],{type:data.mimeType}));
       resultUrlRef.current=href;
       setResult({...data,href});
-    }catch(e){setRxError(e.message);}finally{setVerifying(false);}
+      receiverLogRef.current.verification("success",{sha256:data.receipt.originalSha256,bytes:data.bytes.length});
+    }catch(e){receiverLogRef.current.verification("failure");setRxError(e.message);}finally{setVerifying(false);}
   }
   const navigation=[
     ["send","Transmit",Send],["receive","Receive",ScanLine],
@@ -237,7 +247,7 @@ export default function App() {
               <input type="range" min="1" max="5" value={fps} onChange={e=>setFps(Number(e.target.value))}/></label>
             {txError && <Status kind="error">{txError}</Status>}
             <div className="button-pair"><button className="primary" disabled={!file||txBusy||file.size>MAX_FILE_BYTES||(encrypted&&!password)} onClick={prepare}>{txBusy?"Preparing…":<><Fingerprint size={17}/> Prepare transfer</>}</button><button className="secondary" onClick={resetTx}><RotateCcw size={16}/> Reset</button></div>
-            {tx && <div className="receipt-mini"><div><span>SESSION</span><code>{tx.session}</code></div><div><span>FRAMES PER CYCLE</span><strong>{tx.count*2}</strong></div><div><span>ENCRYPTION</span><strong>{tx.encrypted?"AES-256-GCM":"None"}</strong></div><button onClick={()=>saveText("LightBridge_"+tx.session+"_sender.json",tx.receipt())}><Download size={15}/> Sender receipt</button></div>}
+            {tx && <div className="receipt-mini"><div><span>SESSION</span><code>{tx.session}</code></div><div><span>FRAMES PER CYCLE</span><strong>{tx.count*2}</strong></div><div><span>ENCRYPTION</span><strong>{tx.encrypted?"AES-256-GCM":"None"}</strong></div><button onClick={()=>saveText("LightBridge_"+tx.session+"_sender.json",tx.receipt())}><Download size={15}/> Sender receipt</button><button onClick={()=>saveText("LightBridge_"+tx.session+"_sender-field-log.json",senderLogRef.current.exportLog({deviceLabel:"sender-browser"}))}><Activity size={15}/> Sender field log</button></div>}
           </section>
           <section className="panel output-panel"><Heading eyebrow="02 / LIGHT OUTPUT" title="Transmitting display" description="Point the receiving device's camera at this panel. Keep the whole QR visible."/>
             <div className="qr-stage">
@@ -262,7 +272,16 @@ export default function App() {
             <div className="button-pair"><button className="primary" disabled={rxSnapshot.complete} onClick={cameraOn?stopCamera:startCamera}>{cameraOn?<><CameraOff size={17}/> Stop camera</>:<><Camera size={17}/> Start camera</>}</button><button className="secondary" onClick={resetRx}><RotateCcw size={16}/> Reset</button></div>
             {camError && <Status kind="warning">{camError}</Status>}
             <label className="form-block"><span>Manual PLB1 frame input <small>Fallback for unsupported cameras</small></span><textarea value={manual} rows={3} onChange={e=>setManual(e.target.value)} placeholder="PLB1|session|sequence|…"/></label>
-            <button className="subtle-btn" disabled={!manual.trim()} onClick={()=>{ingest(manual);setManual("");}}><ArrowRight size={15}/> Add pasted frame</button>
+            <button className="subtle-btn" disabled={!manual.trim()} onClick={()=>{ingest(manual,"manual");setManual("");}}><ArrowRight size={15}/> Add pasted frame</button>
+            <div className="field-notes">
+              <strong>Rung 10 / field test conditions (optional, self-reported)</strong>
+              <label>Device label<input value={fieldConditions.deviceLabel} onChange={e=>setFieldConditions(x=>({...x,deviceLabel:e.target.value}))} placeholder="receiver-phone" maxLength={160}/></label>
+              <label>Distance in centimeters<input value={fieldConditions.distanceCm} onChange={e=>setFieldConditions(x=>({...x,distanceCm:e.target.value}))} placeholder="e.g. 35" maxLength={160}/></label>
+              <label>Lighting conditions<input value={fieldConditions.lighting} onChange={e=>setFieldConditions(x=>({...x,lighting:e.target.value}))} placeholder="indoor daylight" maxLength={160}/></label>
+              <label>Notes<input value={fieldConditions.notes} onChange={e=>setFieldConditions(x=>({...x,notes:e.target.value}))} placeholder="phone angle, brightness, interruptions" maxLength={160}/></label>
+            </div>
+            <button className="subtle-btn" onClick={()=>saveText("LightBridge_"+(rxSnapshot.session||"incomplete")+"_receiver-field-log.json",receiverLogRef.current.exportLog(fieldConditions))}><Activity size={15}/> Export receiver field log</button>
+            <p className="footnote">Frame logs contain no payload or passphrase. Camera and pasted frames are recorded separately. Export from both devices for PoWE analysis.</p>
           </section>
           <section className="panel output-panel"><Heading eyebrow="02 / INTEGRITY" title="Reconstruction status" description="Received blocks are checked and reconstructed locally. No server sees the transfer."/>
             <div className="receive-visual"><div className="receive-dial" style={{"--angle":(rxSnapshot.progress*360)+"deg"}}><div><span>{Math.round(rxSnapshot.progress*100)}%</span><small>RECONSTRUCTED</small></div></div>
