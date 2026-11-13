@@ -1,0 +1,20 @@
+.optical-lab .section-heading{min-height:auto;margin-bottom:18px}
+.lab-warning{display:flex;gap:12px;align-items:flex-start;border:1px solid #8f703a66;border-radius:9px;padding:12px 14px;background:#58401a26;color:#dfc49c;font-size:12px;line-height:1.7;margin-bottom:22px}
+.lab-warning svg{flex-shrink:0;color:#e3ae61}.lab-columns{display:grid;grid-template-columns:1.1fr 1fr;gap:24px}
+.lab-controls,.lab-results{border:1px solid #2b4858;padding:20px;border-radius:11px;background:#091c2b}
+.lab-field{display:block;position:relative;margin-bottom:17px;color:#c9dee6;font-size:12px;font-weight:700}
+.lab-field strong{float:right;color:#78efda;font-family:ui-monospace,monospace}
+.lab-field small{display:block;color:#849faf;font-weight:400;line-height:1.5}
+.lab-field select,.lab-field input[type=number]{width:100%;background:#081523;color:#def5ee;padding:11px;border:1px solid #3c6171;border-radius:7px;margin-top:7px}
+.lab-field input[type=range]{width:100%;margin:13px 0 5px;accent-color:#6de5ce}
+.lab-small-controls{display:grid;grid-template-columns:1fr 1fr;gap:0 15px}
+.lab-results{display:flex;flex-direction:column;gap:20px}.lab-empty{height:100%;min-height:280px;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;gap:13px;color:#87a6b8}
+.lab-empty strong{color:#d8eff0;font-size:15px}.lab-empty span{max-width:320px;font-size:12px;line-height:1.7}
+.lab-stat{display:flex;flex-direction:column;gap:8px}.lab-stat>span,.lab-stat small,.lab-stat-grid span{font-size:11px;color:#8daebc}.lab-stat>strong{font-size:35px;color:#90f9dc}
+.lab-meter{height:10px;border-radius:30px;background:#243f4a;overflow:hidden}.lab-meter div{height:100%;background:#67e3c7;border-radius:30px}
+.lab-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.lab-stat-grid>div{border:1px solid #34505d;padding:11px;border-radius:8px;display:flex;flex-direction:column;gap:6px}.lab-stat-grid strong{font-size:16px;color:#dbf7ee}
+.lab-trial-list{font-size:12px;color:#d8ecf0}.lab-trial-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin-top:12px}
+.lab-trial{border:1px solid #506474;border-radius:7px;padding:6px 8px;display:flex;align-items:center;justify-content:space-between;gap:5px}.lab-trial.pass{border-color:#286a5b;color:#79ebca;background:#0d45352b}.lab-trial.fail{border-color:#8f5965;color:#f3a6b2;background:#5e1d292b}
+.lab-error{color:#ffb2c1;font-size:12px}.optical-lab .secondary{width:fit-content}
+@media(max-width:810px){.lab-columns{grid-template-columns:1fr}.lab-results{min-height:300px}}
+@media(max-width:480px){.lab-small-controls{grid-template-columns:1fr}.lab-controls,.lab-results{padding:14px}}
