@@ -52,3 +52,7 @@ Original LightBridge project code: root MIT license. Node packages have separate
 ## Synthetic Optical Channel Lab
 
 The **Optical Lab** tab runs the actual PLB1 decoder and cryptographic integrity checks against reproducible *synthetic* impairment schedules. It models dropped frames, bursts, duplicate observations, and arrival reordering, with local JSON reports. It does **not** measure physical camera or light reliability. See [docs/CHANNEL-LAB.md](../docs/CHANNEL-LAB.md) for methodology and evidence boundaries.
+
+## Rung 11: Field Compare
+
+The **Field Compare** tab loads sender and receiver event-log JSON locally, separates camera observations from manual entries, checks PLB1 session agreement, compares recorded frame sequence overlap, and optionally shows a synthetic Optical Lab report alongside it. None of these self-reported values establish physical frame loss, independent optical receipt, or one-way latency. See [Rung 11 methodology](../docs/FIELD-COMPARE-RUNG11.md).
