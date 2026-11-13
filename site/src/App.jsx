@@ -11,6 +11,8 @@ import {BLOCK_SIZE,MAX_FILE_BYTES,createTransfer,Receiver,finalizeTransfer} from
 import {FieldRecorder} from "./field-log.js";
 import OpticalLab from "./OpticalLab.jsx";
 import FieldCompare from "./FieldCompare.jsx";
+import TrialKit from "./TrialKit.jsx";
+import {makeTrialFile} from "./trialPacket.js";
 
 const SOURCE = "https://github.com/MichaelWave369/LightBridge";
 const fmt = bytes => bytes < 1024 ? bytes + " B" : bytes < 1048576 ? (bytes / 1024).toFixed(1) + " KiB" : (bytes / 1048576).toFixed(2) + " MiB";
@@ -103,6 +105,11 @@ export default function App() {
     setFile(file);setTx(null);setQrSrc("");setRunning(false);setSeq(0);setTxError("");
     if(!file.size || file.size>MAX_FILE_BYTES)setTxError("Select a nonempty file up to 2 MiB.");
   };
+  function loadPublicTrialPacket(){
+    if(inputRef.current)inputRef.current.value="";
+    selectFile(makeTrialFile(256));
+    setEncrypted(false);setPassword("");setFps(1);
+  }
   async function prepare(){
     if(!file)return;
     setTxBusy(true);setTxError("");setRunning(false);
@@ -201,7 +208,7 @@ export default function App() {
   }
   const navigation=[
     ["send","Transmit",Send],["receive","Receive",ScanLine],
-    ["stack","STACK-21",Layers3],["lab","Optical Lab",Activity],["compare","Field Compare",FileCheck2],["about","Protocol",BookOpen]
+    ["stack","STACK-21",Layers3],["lab","Optical Lab",Activity],["compare","Field Compare",FileCheck2],["trial","Trial Kit",CheckCircle2],["about","Protocol",BookOpen]
   ];
   return <div className="shell">
     <div className="ambient ambient-one"/><div className="ambient ambient-two"/>
@@ -241,6 +248,7 @@ export default function App() {
               <UploadCloud size={28}/><strong>{file?file.name:"Drop a file or browse"}</strong>
               <span>{file?fmt(file.size)+" • Ready to prepare":"Any file type · Maximum 2 MiB"}</span>
             </div>
+            <div className="trial-quickload"><button className="secondary" onClick={loadPublicTrialPacket}><FileCheck2 size={16}/> Load public 256-byte test packet</button><span>Harmless synthetic data; encryption turns off for this test. You must still Prepare and Start.</span></div>
             <div className="form-row"><span className="form-label"><LockKeyhole size={15}/> Encrypt transfer</span>
               <button className={"toggle"+(encrypted?" on":"")} onClick={()=>{setEncrypted(v=>!v);setTx(null);setRunning(false);}} aria-pressed={encrypted}><span/></button></div>
             {encrypted && <label className="form-block"><span>Shared passphrase <small>Give it to the receiver separately</small></span><input type="password" autoComplete="off" value={password} onChange={e=>{setPassword(e.target.value);setRunning(false);setTx(null);}} placeholder="Enter a strong passphrase"/></label>}
@@ -310,6 +318,8 @@ export default function App() {
         {tab==="lab" && <OpticalLab/>}
 
         {tab==="compare" && <FieldCompare/>}
+
+        {tab==="trial" && <TrialKit onNavigate={setTab}/>}
 
         {tab==="about" && <section className="panel standalone"><Heading eyebrow="PROTOCOL / RELEASE BOUNDARIES" title="Optical transfer without a middleman." description="Designed for independently owned devices. This React implementation targets the recovered PLB1 file and frame structure."/>
           <div className="about-grid">
