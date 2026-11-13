@@ -48,3 +48,7 @@ Do not describe the URL as live before a successful Pages deployment is visible 
 ## Licensing
 
 Original LightBridge project code: root MIT license. Node packages have separate upstream licenses and must retain appropriate attribution. The recovered candidate's historical license notices remain archival artifacts; neither UI presentation nor MIT claims physical security certification.
+
+## Synthetic Optical Channel Lab
+
+The **Optical Lab** tab runs the actual PLB1 decoder and cryptographic integrity checks against reproducible *synthetic* impairment schedules. It models dropped frames, bursts, duplicate observations, and arrival reordering, with local JSON reports. It does **not** measure physical camera or light reliability. See [docs/CHANNEL-LAB.md](../docs/CHANNEL-LAB.md) for methodology and evidence boundaries.

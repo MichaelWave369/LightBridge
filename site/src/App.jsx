@@ -8,6 +8,7 @@ import {
   Monitor, WifiOff, FileCheck2, Activity, Fingerprint, Eye, Shield, FileText
 } from "lucide-react";
 import {BLOCK_SIZE,MAX_FILE_BYTES,createTransfer,Receiver,finalizeTransfer} from "./protocol.js";
+import OpticalLab from "./OpticalLab.jsx";
 
 const SOURCE = "https://github.com/MichaelWave369/LightBridge";
 const fmt = bytes => bytes < 1024 ? bytes + " B" : bytes < 1048576 ? (bytes / 1024).toFixed(1) + " KiB" : (bytes / 1048576).toFixed(2) + " MiB";
@@ -189,7 +190,7 @@ export default function App() {
   }
   const navigation=[
     ["send","Transmit",Send],["receive","Receive",ScanLine],
-    ["stack","STACK-21",Layers3],["about","Protocol",BookOpen]
+    ["stack","STACK-21",Layers3],["lab","Optical Lab",Activity],["about","Protocol",BookOpen]
   ];
   return <div className="shell">
     <div className="ambient ambient-one"/><div className="ambient ambient-two"/>
@@ -285,6 +286,8 @@ export default function App() {
             <div className="stack-facts"><div><small>ARCHITECTURE</small><strong>STACK-21</strong></div><div><small>MODE</small><strong>Experimental</strong></div><div><small>PHYSICAL VERIFICATION</small><strong className="warn-text">Not established</strong></div><div><small>REQUIRED NEXT GATE</small><strong>Measured device-to-device tests</strong></div><a className="secondary" href={SOURCE+"/blob/main/docs/PHYSICAL-TEST-GATES.md"} target="_blank" rel="noreferrer">Read physical test gates <ExternalLink size={16}/></a></div>
           </div>
         </section>}
+
+        {tab==="lab" && <OpticalLab/>}
 
         {tab==="about" && <section className="panel standalone"><Heading eyebrow="PROTOCOL / RELEASE BOUNDARIES" title="Optical transfer without a middleman." description="Designed for independently owned devices. This React implementation targets the recovered PLB1 file and frame structure."/>
           <div className="about-grid">
