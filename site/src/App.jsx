@@ -10,6 +10,7 @@ import {
 import {BLOCK_SIZE,MAX_FILE_BYTES,createTransfer,Receiver,finalizeTransfer} from "./protocol.js";
 import {FieldRecorder} from "./field-log.js";
 import OpticalLab from "./OpticalLab.jsx";
+import FieldCompare from "./FieldCompare.jsx";
 
 const SOURCE = "https://github.com/MichaelWave369/LightBridge";
 const fmt = bytes => bytes < 1024 ? bytes + " B" : bytes < 1048576 ? (bytes / 1024).toFixed(1) + " KiB" : (bytes / 1048576).toFixed(2) + " MiB";
@@ -200,7 +201,7 @@ export default function App() {
   }
   const navigation=[
     ["send","Transmit",Send],["receive","Receive",ScanLine],
-    ["stack","STACK-21",Layers3],["lab","Optical Lab",Activity],["about","Protocol",BookOpen]
+    ["stack","STACK-21",Layers3],["lab","Optical Lab",Activity],["compare","Field Compare",FileCheck2],["about","Protocol",BookOpen]
   ];
   return <div className="shell">
     <div className="ambient ambient-one"/><div className="ambient ambient-two"/>
@@ -307,6 +308,8 @@ export default function App() {
         </section>}
 
         {tab==="lab" && <OpticalLab/>}
+
+        {tab==="compare" && <FieldCompare/>}
 
         {tab==="about" && <section className="panel standalone"><Heading eyebrow="PROTOCOL / RELEASE BOUNDARIES" title="Optical transfer without a middleman." description="Designed for independently owned devices. This React implementation targets the recovered PLB1 file and frame structure."/>
           <div className="about-grid">
